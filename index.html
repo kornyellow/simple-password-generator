@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Simple Password Generator</title>
+	<meta name="description" content="Simple website to generate password for you">
+</head>
+
+<style>
+:root {
+	--dark: #222;
+	--gray: #aaa;
+	--light: #fff;
+}
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	font-family: sans-serif;
+	background: var(--light);
+	color: var(--dark);
+	font-size: 18px;
+}
+main {
+	max-width: 1000px;
+	margin-top: 2rem;
+	margin-inline: auto;
+	padding-inline: 1rem;
+}
+footer {
+	max-width: 1000px;
+	margin-top: 3rem;
+	margin-inline: auto;
+	padding-inline: 1rem;
+}
+hr {
+	border: none;
+	border-bottom: 1px solid var(--gray);
+	margin: 1rem 0;
+}
+
+div.customize {
+	display: grid;
+	row-gap: 0.2rem;
+	margin-top: 0.2rem;
+}
+
+input {
+	font-family: sans-serif;
+	font-size: 1rem;
+	margin-inline: 0.5rem;
+}
+input[type="checkbox"] {
+	transform: scale(1.5);
+}
+
+div#generated_password {
+	font-size: 1.5rem;
+	width: 100%;
+	margin-bottom: 1rem;
+	border: 1px solid var(--gray);
+	padding: 0.2rem 0.5rem;
+
+	-webkit-user-select: all;
+	-ms-user-select: all;
+	user-select: all;
+}
+
+button#generate {
+	font-family: sans-serif;
+	font-size: 1rem;
+	margin-top: 1rem;
+	padding: 0.2rem;
+}
+</style>
+
+<body>
+	<main>
+		<section class="head">
+			<h1>Password Generator</h1>
+			<p>A simple website to generate password for you</p>
+		</section>
+		<hr>
+		<section>
+			<div id="generated_password"></div>
+
+			<h1>Customize Password</h1>
+			<div class="customize">
+				<div>
+					<label for="password_length">Password length</label>
+					<input id="password_length" type="number" size="4" value="16" min="0">
+				</div>
+				<div>
+					<input id="is_uppercase" type="checkbox" checked>
+					<label for="is_uppercase">Uppercase</label>
+				</div>
+				<div>
+					<input id="is_lowercase" type="checkbox" checked>
+					<label for="is_lowercase">Lowercase</label>
+				</div>
+				<div>
+					<input id="contains_number" type="checkbox" checked>
+					<label for="contains_number">Numbers</label>
+				</div>
+				<div>
+					<input id="contains_symbol" type="checkbox" checked>
+					<label for="contains_symbol">Symbol</label>
+				</div>
+				<button id="generate" type="button">Generate new password</button>
+			</div>
+		</section>
+	</main>
+	<footer>
+		<p>Made by <a href="https://github.com/kornyellow" target="_blank">kornyellow</a></p>
+	</footer>
+</body>
+
+<script>
+const generated_password_element = document.getElementById("generated_password");
+const password_length_element = document.getElementById("password_length");
+const is_uppercase_element = document.getElementById("is_uppercase");
+const is_lowercase_element = document.getElementById("is_lowercase");
+const contains_number_element = document.getElementById("contains_number");
+const contains_symbol_element = document.getElementById("contains_symbol");
+const generate_button = document.getElementById("generate");
+
+const uppercase_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const lowercase_letters = "abcdefghijklmnopqrstuvwxyz";
+const numbers = "1234567890";
+const symbols = "!@#$^&*_+=.?";
+
+password_length_element.oninput = generatePassword;
+is_uppercase_element.oninput = generatePassword;
+is_lowercase_element.oninput = generatePassword;
+contains_number_element.oninput = generatePassword;
+contains_symbol_element.oninput = generatePassword;
+generate_button.onclick = generatePassword;
+
+generatePassword();
+
+function generatePassword() {
+	const is_uppercase = is_uppercase_element.checked;
+	const is_lowercase = is_lowercase_element.checked;
+	const contains_number = contains_number_element.checked;
+	const contains_symbol = contains_symbol_element.checked;
+
+	let sample = "";
+	if (is_uppercase) {
+		sample += uppercase_letters;
+	}
+	if (is_lowercase) {
+		sample += lowercase_letters;
+	}
+	if (contains_number) {
+		sample += numbers;
+	}
+	if (contains_symbol) {
+		sample += symbols;
+	}
+	const sample_length = sample.length
+
+	const length = password_length_element.value;
+
+	let password = "";
+	for (let i = 0; i < length; i++) {
+		password += sample.charAt(Math.floor(Math.random() * sample_length))
+	}
+	generated_password_element.innerHTML = password;
+}
+</script>
+
+</html>
