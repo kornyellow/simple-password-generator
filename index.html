@@ -19,6 +19,8 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
+	list-style: none;
+	text-decoration: none;
 }
 
 html {
@@ -35,7 +37,7 @@ main {
 }
 footer {
 	max-width: 1000px;
-	margin-top: 3rem;
+	margin-top: 2rem;
 	margin-inline: auto;
 	padding-inline: 1rem;
 }
@@ -47,38 +49,65 @@ hr {
 
 div.customize {
 	display: grid;
-	row-gap: 0.2rem;
+	row-gap: 0.4rem;
 	margin-top: 0.2rem;
 }
 
 input {
 	font-family: sans-serif;
 	font-size: 1rem;
-	margin-inline: 0.5rem;
+}
+input[type="number"] {
+	font-size: 1.2rem;
+	width: 5rem;
+	margin-left: 1rem;
 }
 input[type="checkbox"] {
 	transform: scale(1.5);
+	margin: 0 1rem 0 0.8rem;
+	cursor: pointer;
+}
+label {
+	cursor: pointer;
+	user-select: none;
+	margin-bottom: 0;
 }
 
-div#generated_password {
-	font-size: 1.5rem;
+input#generated_password {
+	font-size: 1.2rem;
 	width: 100%;
 	margin-bottom: 1rem;
 	border: 1px solid var(--gray);
-	padding: 0.2rem 0.5rem;
+	padding: 0.4rem 0.5rem;
 	overflow-x: auto;
 	font-family: monospace;
+	height: 2.4rem;
 
 	-webkit-user-select: all;
 	-ms-user-select: all;
 	user-select: all;
 }
+div.generated {
+	display: flex;
+}
+div.generated > button {
+	font-size: 1.2rem;
+	padding: 0.2rem 1rem;
+	height: 2.4rem;
+	border: 1px solid var(--gray);
+	border-radius: 0.5rem 0 0 0.5rem;
+	cursor: pointer;
+}
 
 button#generate {
 	font-family: sans-serif;
-	font-size: 1rem;
 	margin-top: 1rem;
-	padding: 0.2rem;
+	font-size: 1.2rem;
+	padding: 0.2rem 1rem;
+	height: 2.5rem;
+	border: 1px solid var(--gray);
+	border-radius: 0.5rem;
+	cursor: pointer;
 }
 </style>
 
@@ -91,29 +120,27 @@ button#generate {
 		</section>
 		<hr>
 		<section>
-			<div id="generated_password">Generating...</div>
+			<div class="generated">
+				<button id="copy" type="button">Copy</button>
+				<input id="generated_password" readonly value="Generating...">
+			</div>
 
 			<h1>Customize Password</h1>
 			<div class="customize">
 				<div>
-					<label for="password_length">Password length</label>
-					<input id="password_length" type="number" size="4" value="16" min="0">
+					<label for="password_length">Password length</label><input id="password_length" type="number" size="4" value="16" max="32" min="8">
 				</div>
 				<div>
-					<input id="is_uppercase" type="checkbox" checked>
-					<label for="is_uppercase">Uppercase</label>
+					<input id="is_uppercase" type="checkbox" checked><label for="is_uppercase">Uppercase</label>
 				</div>
 				<div>
-					<input id="is_lowercase" type="checkbox" checked>
-					<label for="is_lowercase">Lowercase</label>
+					<input id="is_lowercase" type="checkbox" checked><label for="is_lowercase">Lowercase</label>
 				</div>
 				<div>
-					<input id="contains_number" type="checkbox" checked>
-					<label for="contains_number">Numbers</label>
+					<input id="contains_number" type="checkbox" checked><label for="contains_number">Numbers</label>
 				</div>
 				<div>
-					<input id="contains_symbol" type="checkbox" checked>
-					<label for="contains_symbol">Symbol</label>
+					<input id="contains_symbol" type="checkbox" checked><label for="contains_symbol">Symbol</label>
 				</div>
 				<button id="generate" type="button">Generate new password</button>
 			</div>
@@ -132,6 +159,7 @@ const is_lowercase_element = document.getElementById("is_lowercase");
 const contains_number_element = document.getElementById("contains_number");
 const contains_symbol_element = document.getElementById("contains_symbol");
 const generate_button = document.getElementById("generate");
+const copy_button = document.getElementById("copy");
 
 const uppercase_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const lowercase_letters = "abcdefghijklmnopqrstuvwxyz";
@@ -144,14 +172,42 @@ is_lowercase_element.oninput = generatePassword;
 contains_number_element.oninput = generatePassword;
 contains_symbol_element.oninput = generatePassword;
 generate_button.onclick = generatePassword;
+copy_button.onclick = copyPassword;
 
 generatePassword();
 
-function generatePassword() {
+function copyPassword() {
+	selection = window.getSelection();
+	generated_password_element.select();
+	generated_password_element.setSelectionRange(0, 99999);
+	navigator.clipboard.writeText(generated_password.value);
+}
+
+function disableInput(value) {
+	if (is_uppercase_element.checked) {
+		is_uppercase_element.disabled = value;
+		is_uppercase_element.style.cursor = !value ? "pointer" : "not-allowed";
+	}
+	if (is_lowercase_element.checked) {
+		is_lowercase_element.disabled = value;
+		is_lowercase_element.style.cursor = !value ? "pointer" : "not-allowed";
+	}
+	if (contains_number_element.checked) {
+		contains_number_element.disabled = value;
+		contains_number_element.style.cursor = !value ? "pointer" : "not-allowed";
+	}
+	if (contains_symbol_element.checked) {
+		contains_symbol_element.disabled = value;
+		contains_symbol_element.style.cursor = !value ? "pointer" : "not-allowed";
+	}
+}
+
+function generatePassword(element) {
 	const is_uppercase = is_uppercase_element.checked;
 	const is_lowercase = is_lowercase_element.checked;
 	const contains_number = contains_number_element.checked;
 	const contains_symbol = contains_symbol_element.checked;
+	const all = is_uppercase + is_lowercase + contains_number + contains_symbol;
 
 	let sample = "";
 	if (is_uppercase) {
@@ -166,6 +222,11 @@ function generatePassword() {
 	if (contains_symbol) {
 		sample += symbols;
 	}
+	if (all === 1) {
+		disableInput(true);
+	} else {
+		disableInput(false);
+	}
 	const sample_length = sample.length
 
 	const length = password_length_element.value;
@@ -174,7 +235,7 @@ function generatePassword() {
 	for (let i = 0; i < length; i++) {
 		password += sample.charAt(Math.floor(Math.random() * sample_length))
 	}
-	generated_password_element.innerHTML = password;
+	generated_password_element.value = password;
 }
 </script>
 
